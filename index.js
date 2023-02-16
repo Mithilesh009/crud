@@ -5,15 +5,22 @@ const mysql = require('mysql2')
 const cors = require("cors")
 const PORT = process.env.PORT || 3001
 const path = require('path')
+const HOST = process.env.HOST
+const USER = process.env.USER
+const PASSWORD = process.env.PASSWORD
+const DATABASE = process.env.DATABASE
+
+
+
 
 // const mysql = require('mysql2');
 
 
 const db = mysql.createConnection({
-    host:'sql12.freemysqlhosting.net',
-    user: 'sql12598587',
-    password:'a2T5vHQmbg',
-    database:'sql12598587'
+    host:HOST,
+    user: USER,
+    password:PASSWORD,
+    database:DATABASE
 });
 
 
