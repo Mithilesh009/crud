@@ -8,7 +8,7 @@ import autoIncrement from "mongoose-auto-increment"
 
 
 const app= express();
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 dotenv.config();
 
