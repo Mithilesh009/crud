@@ -1,27 +1,22 @@
-const express = require('express');
+import Connection from "./database/db.js"
+import express from "express"
+import bodyParser from "body-parser"
+import cors from "cors"
+import dotenv from "dotenv"
+import User from "./schema/user_schema.js"
+import autoIncrement from "mongoose-auto-increment"
+
+
 const app= express();
-const bodyParser = require('body-parser')
-const mysql = require('mysql2') 
-const cors = require("cors")
-const PORT = process.env.PORT || 3001
-const path = require('path')
-const HOST = process.env.HOST
-const USER = process.env.USER
-const PASSWORD = process.env.PASSWORD
-const DATABASE = process.env.DATABASE
+const PORT = 3001
 
+dotenv.config();
 
+const username = process.env.USER;
+const password = process.env.PASSWORD;
 
+Connection(username,password);
 
-// const mysql = require('mysql2');
-
-
-const db = mysql.createConnection({
-    host:HOST,
-    user: USER,
-    password:PASSWORD,
-    database:DATABASE
-});
 
 
 app.use(cors());
@@ -34,36 +29,29 @@ app.use(bodyParser.urlencoded({extended:true}));
 // }
 
 
-app.post("/create" ,(req,res)=>{
-    console.log(req.body)
-    const productName = req.body.productName;
-    const seller = req.body.seller;
-    const price = req.body.price;
+app.post("/create" , async (req,res)=>{
+    const user = req.body ;
+    const newUser = new User(user);
+    console.log(newUser)
     
-    db.query('INSERT INTO selleritems (ProductName,seller,price) VALUES(?,?,?)',[productName,seller,price], (err,result)=>{
-        if(err){
-            console.log("error : ",err)
-            
-        }else{
-            console.log("result : ",result)
-            res.send("Values inserted")
-        }
-    })
-
+    try {
+        await newUser.save();
+        res.json(newUser)
+    } catch (error) {
+        res.json({message: error.message})
+    }
+    
 })
 
-app.get("/read" , (req,res)=>{
-    const sqlGet= "SELECT * FROM selleritems";
-    db.query(sqlGet,(err,result)=>{
-        if(err){
-            console.log('error : ',err)
-        }else{
-            console.log('result : ',result)
-            res.send(result)
-        }
-    }) 
-
-
+app.get("/read" , async (req,res)=>{
+try {
+    const users = await User.find({})
+    res.status(200).json(users);
+} catch (error) {
+    res.json({message: error.message})
+}
+        
+    
 })
 
 
@@ -92,31 +80,34 @@ app.put('/update',(req,res)=>{
     )
 })
 
-app.delete('/delete/:id',(req,res)=>{
-    const id = req.params.id;
-    db.query("DELETE FROM selleritems WHERE id=?",id,(err,result)=>{
-        console.log("error :",err)
-        console.log("result :",result)
-    })
+app.delete('/delete/:id',async (req,res)=>{
+
+    try {
+        const id = req.params.id
+        console.log(id)
+        const users = await User.deleteOne({_id : id})
+        res.status(200).json(users);
+
+    } catch (error) {
+        res.status(404).json({message:error.message});        
+    }
+    
 })
 
 
 
-app.delete('/deleteAll',(req,res)=>{
-    db.query("TRUNCATE TABLE selleritems ",(err,result)=>{
-        console.log("error :",err)
-        console.log("result :",result)
-    })
+app.delete('/deleteAll',async (req,res)=>{
+    try {
+        const users = await User.deleteMany()
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(404).json({message:error.message});        
+    }
 })
 
 
-app.use(express.static(path.join(__dirname, './client/build')))
-
-app.get('*' , (req,res)=>{
-    res.sendFile(path.join(__dirname , './client/build/index.html'))
-});
 
 app.listen(PORT , ()=>{
-    console.log("Server is runing on port 3000")
+    console.log(`Server is runing on port ${PORT} `)
 })
 
