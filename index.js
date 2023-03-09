@@ -46,6 +46,7 @@ app.post("/create" , async (req,res)=>{
 app.get("/read" , async (req,res)=>{
 try {
     const users = await User.find({})
+    console.log(users);
     res.status(200).json(users);
 } catch (error) {
     res.json({message: error.message})
